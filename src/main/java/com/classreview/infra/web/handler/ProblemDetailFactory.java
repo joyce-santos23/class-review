@@ -3,8 +3,6 @@ package com.classreview.infra.web.handler;
 
 import jakarta.ws.rs.core.Response;
 
-import org.jboss.resteasy.reactive.RestResponse;
-
 import java.net.URI;
 
 import java.time.OffsetDateTime;
