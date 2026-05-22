@@ -9,9 +9,24 @@ services:
 
     environment:
       - SERVICES=dynamodb,sqs
-      - DEBUG=1
-      - AWS_DEFAULT_REGION=us-east-1
 
     volumes:
-      - "./localstack:/var/lib/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./localstack/init:/etc/localstack/init/ready.d"
+
+  classreview-api:
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile.jvm
+
+    container_name: classreview-api
+
+    ports:
+      - "8081:8080"
+
+    depends_on:
+      - localstack
+
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=us-east-1

@@ -1,4 +1,4 @@
-package com.classreview.infra.web.payload;
+package com.classreview.infra.web.payload.feedback;
 
 public record FeedbackResponsePayload(
         String id,

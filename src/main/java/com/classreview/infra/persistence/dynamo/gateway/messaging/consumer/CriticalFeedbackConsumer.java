@@ -2,6 +2,7 @@ package com.classreview.infra.persistence.dynamo.gateway.messaging.consumer;
 
 import com.classreview.core.application.dto.event.FeedbackEventDTO;
 import com.classreview.core.domain.exceptions.ErrorReadingMessageException;
+import com.classreview.infra.web.filter.CorrelationIdConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -11,6 +12,7 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
+import org.jboss.logging.MDC;
 
 import java.util.List;
 
@@ -59,6 +61,11 @@ public class CriticalFeedbackConsumer {
                                 message.body(),
                                 FeedbackEventDTO.class
                         );
+
+                MDC.put(
+                        CorrelationIdConstants.MDC_KEY,
+                        event.correlationId()
+                );
 
                 processCriticalFeedback(event);
 

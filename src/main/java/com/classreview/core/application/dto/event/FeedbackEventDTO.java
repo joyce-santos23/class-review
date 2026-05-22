@@ -8,15 +8,17 @@ public record FeedbackEventDTO(
         String id,
         String description,
         String urgency,
-        Instant createdAt
+        Instant createdAt,
+        String correlationId
 ) {
 
-    public static FeedbackEventDTO from(Feedback feedback) {
+    public static FeedbackEventDTO from(Feedback feedback, String correlationId) {
         return new FeedbackEventDTO(
                 feedback.getId(),
                 feedback.getComment(),
                 feedback.getUrgency().name(),
-                feedback.getCreatedAt()
+                feedback.getCreatedAt(),
+                correlationId
         );
     }
 }

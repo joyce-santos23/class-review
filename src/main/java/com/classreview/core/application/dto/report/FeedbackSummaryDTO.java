@@ -5,6 +5,7 @@ import com.classreview.core.domain.entity.Feedback;
 import java.time.Instant;
 
 public record FeedbackSummaryDTO(
+        int rating,
         String description,
         String urgency,
         Instant createdAt
@@ -12,6 +13,7 @@ public record FeedbackSummaryDTO(
 
     public static FeedbackSummaryDTO from(Feedback feedback) {
         return new FeedbackSummaryDTO(
+                feedback.getRating(),
                 feedback.getComment(),
                 feedback.getUrgency().name(),
                 feedback.getCreatedAt()

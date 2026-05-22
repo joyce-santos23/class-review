@@ -1,9 +1,9 @@
-package com.classreview.infra.web.mapper;
+package com.classreview.infra.web.mapper.feedback;
 
 import com.classreview.core.application.dto.feedback.FeedbackRequestDTO;
 import com.classreview.core.application.dto.feedback.FeedbackResponseDTO;
-import com.classreview.infra.web.payload.FeedbackRequestPayload;
-import com.classreview.infra.web.payload.FeedbackResponsePayload;
+import com.classreview.infra.web.payload.feedback.FeedbackRequestPayload;
+import com.classreview.infra.web.payload.feedback.FeedbackResponsePayload;
 
 public class FeedbackWebMapper {
 

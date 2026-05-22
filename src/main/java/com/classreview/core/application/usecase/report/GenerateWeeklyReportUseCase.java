@@ -60,7 +60,7 @@ public class GenerateWeeklyReportUseCase {
                 );
 
         log.info(
-                "Found %s feedbacks for weekly report",
+                "Found {} feedbacks for weekly report",
                 feedbacks.size()
         );
 

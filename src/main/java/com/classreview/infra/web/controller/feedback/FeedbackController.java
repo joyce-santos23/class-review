@@ -1,16 +1,18 @@
-package com.classreview.infra.web.controller;
+package com.classreview.infra.web.controller.feedback;
 
 import com.classreview.core.application.dto.feedback.FeedbackResponseDTO;
 import com.classreview.core.application.usecase.feedback.CreateFeedbackUseCase;
-import com.classreview.infra.web.mapper.FeedbackWebMapper;
-import com.classreview.infra.web.payload.FeedbackRequestPayload;
-import com.classreview.infra.web.payload.FeedbackResponsePayload;
+import com.classreview.infra.web.mapper.feedback.FeedbackWebMapper;
+import com.classreview.infra.web.payload.feedback.FeedbackRequestPayload;
+import com.classreview.infra.web.payload.feedback.FeedbackResponsePayload;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("/feedbacks")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -25,9 +27,11 @@ public class FeedbackController {
     }
 
     @POST
-    public FeedbackResponsePayload createFeedback(FeedbackRequestPayload request) {
+    public Response createFeedback(@Valid FeedbackRequestPayload request) {
 
         FeedbackResponseDTO response = createFeedbackUseCase.execute(FeedbackWebMapper.toDTO(request));
-        return FeedbackWebMapper.toResponse(response);
+        return Response.status(Response.Status.CREATED)
+                .entity(FeedbackWebMapper.toResponse(response))
+                .build();
     }
 }
