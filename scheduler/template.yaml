@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: Scheduler Lambda para gerar relatório semanal de feedbacks
+
+Resources:
+
+  WeeklyReportScheduler:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.classreview.scheduler.lambda.WeeklyReportSchedulerHandler::handleRequest
+      Runtime: java21
+      CodeUri: ../scheduler/target/scheduler-1.0.0.jar
+      MemorySize: 512
+      Timeout: 120
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: Feedback  # Nome da tabela que já existe
+      Events:
+        WeeklySchedule:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: 'rate(2 minutes)'  # Teste
+            Description: "Gera relatório semanal automaticamente"
+      Environment:
+        Variables:
+          QUARKUS_DYNAMODB_AWS_REGION: us-east-1
+
+Outputs:
+  SchedulerFunctionArn:
+    Description: Weekly Report Scheduler ARN
+    Value: !GetAtt WeeklyReportScheduler.Arn
