@@ -1,0 +1,38 @@
+package com.persistence.dynamo.lambda.feedback;
+
+import com.classreview.core.application.gateway.feedback.FeedbackGateway;
+import com.classreview.core.domain.entity.Feedback;
+import com.persistence.dynamo.entity.FeedbackEntity;
+import com.persistence.dynamo.mapper.FeedbackMapper;
+import com.persistence.dynamo.schema.FeedbackTableSchema;
+import jakarta.enterprise.context.ApplicationScoped;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@ApplicationScoped
+public class FeedbackRepository implements FeedbackGateway {
+
+    private final DynamoDbTable<FeedbackEntity> table;
+
+    public FeedbackRepository(DynamoDbEnhancedClient client) {
+        this.table = client.table("Feedback", FeedbackTableSchema.SCHEMA);
+    }
+    @Override
+    public void save(Feedback feedback) {
+        table.putItem(FeedbackMapper.toEntity(feedback));
+    }
+
+    @Override
+    public List<Feedback> findByPeriod(Instant start, Instant end) {
+        return table.scan()
+                .items()
+                .stream()
+                .map(FeedbackMapper::toDomain)
+                .filter(f -> !f.getCreatedAt().isBefore(start) && !f.getCreatedAt().isAfter(end))
+                .collect(Collectors.toList());
+    }
+}

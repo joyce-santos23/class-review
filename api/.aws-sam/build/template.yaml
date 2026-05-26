@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: API Lambda para gerenciar feedbacks
+Resources:
+  FeedbackApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest
+      Runtime: java21
+      CodeUri: ../../target/function.zip
+      MemorySize: 512
+      Timeout: 30
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: FeedbackTable
+      - Statement:
+        - Effect: Allow
+          Action:
+          - sqs:SendMessage
+          Resource:
+            Fn::GetAtt:
+            - CriticalFeedbackQueue
+            - Arn
+      Events:
+        CreateFeedback:
+          Type: Api
+          Properties:
+            Path: /feedbacks
+            Method: POST
+      Environment:
+        Variables:
+          QUARKUS_DYNAMODB_AWS_REGION: us-east-1
+          QUARKUS_SQS_AWS_REGION: us-east-1
+          FEEDBACK_TABLE_NAME:
+            Ref: FeedbackTable
+          CRITICAL_FEEDBACK_QUEUE_URL:
+            Ref: CriticalFeedbackQueue
+          CRITICAL_FEEDBACK_QUEUE_ARN:
+            Fn::GetAtt:
+            - CriticalFeedbackQueue
+            - Arn
+  FeedbackTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Feedback
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      - AttributeName: createdAt
+        AttributeType: S
+      KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+      GlobalSecondaryIndexes:
+      - IndexName: createdAt-index
+        KeySchema:
+        - AttributeName: createdAt
+          KeyType: HASH
+        Projection:
+          ProjectionType: ALL
+  CriticalFeedbackQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: critical-feedback
+      VisibilityTimeout: 120
+Outputs:
+  ApiUrl:
+    Description: HTTP API endpoint URL
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod
+    Export:
+      Name: FeedbackApiUrl
+  FeedbackTableName:
+    Description: Nome da tabela DynamoDB
+    Value:
+      Ref: FeedbackTable
+    Export:
+      Name: FeedbackTableName
+  FeedbackTableArn:
+    Description: ARN da tabela DynamoDB
+    Value:
+      Fn::GetAtt:
+      - FeedbackTable
+      - Arn
+    Export:
+      Name: FeedbackTableArn
+  CriticalFeedbackQueueName:
+    Description: Nome da fila SQS
+    Value:
+      Fn::GetAtt:
+      - CriticalFeedbackQueue
+      - QueueName
+    Export:
+      Name: CriticalFeedbackQueueName
+  CriticalFeedbackQueueArn:
+    Description: ARN da fila SQS
+    Value:
+      Fn::GetAtt:
+      - CriticalFeedbackQueue
+      - Arn
+    Export:
+      Name: CriticalFeedbackQueueArn
+  CriticalFeedbackQueueUrl:
+    Description: URL da fila SQS
+    Value:
+      Ref: CriticalFeedbackQueue
+    Export:
+      Name: CriticalFeedbackQueueUrl

@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "Scheduler Lambda para gerar relat\xF3rio semanal"
+Resources:
+  WeeklyReportScheduler:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.classreview.scheduler.infra.lambda.WeeklyReportSchedulerHandler::handleRequest
+      Runtime: java21
+      CodeUri: ../../target/function.zip
+      MemorySize: 512
+      Timeout: 120
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Fn::ImportValue: FeedbackTableName
+      Environment:
+        Variables:
+          QUARKUS_DYNAMODB_AWS_REGION: us-east-1
+          FEEDBACK_TABLE_NAME:
+            Fn::ImportValue: FeedbackTableName
+          FEEDBACK_API_URL:
+            Fn::ImportValue: FeedbackApiUrl
+      Events:
+        WeeklySchedule:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(2 minutes)
+            Description: "Gera relat\xF3rio semanal automaticamente"
