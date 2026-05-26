@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: Consumer Lambda para processar feedbacks críticos
+
+Resources:
+
+  CriticalFeedbackConsumerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.classreview.infra.consumer.CriticalFeedbackConsumer::handleRequest
+      Runtime: java21
+      CodeUri: target/function.zip
+      MemorySize: 512
+      Timeout: 60
+
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !ImportValue CriticalFeedbackQueueName
+
+      Events:
+        CriticalFeedbackQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !ImportValue CriticalFeedbackQueueArn
+            BatchSize: 10
+
+      Environment:
+        Variables:
+          QUARKUS_SQS_AWS_REGION: us-east-1
+          CRITICAL_FEEDBACK_QUEUE_URL: !ImportValue CriticalFeedbackQueueUrl
+          CRITICAL_FEEDBACK_QUEUE_ARN: !ImportValue CriticalFeedbackQueueArn

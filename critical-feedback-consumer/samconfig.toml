@@ -1,9 +1,9 @@
 version = 0.1
 
 [default.deploy.parameters]
-stack_name = "class-review-api"
+stack_name = "class-review-consumer"
 resolve_s3 = true
-s3_prefix = "class-review-api"
+s3_prefix = "class-review-consumer"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 image_repositories = []

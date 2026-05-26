@@ -6,7 +6,6 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.classreview.infra.dto.FeedbackEventDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.logging.MDC;
 
 @Slf4j
 public class CriticalFeedbackConsumer
@@ -16,7 +15,8 @@ public class CriticalFeedbackConsumer
             "correlationId";
 
     private final ObjectMapper objectMapper =
-            new ObjectMapper();
+            new ObjectMapper()
+                    .findAndRegisterModules();
 
     @Override
     public Void handleRequest(
@@ -33,11 +33,6 @@ public class CriticalFeedbackConsumer
                                 message.getBody(),
                                 FeedbackEventDTO.class
                         );
-
-                MDC.put(
-                        CORRELATION_ID,
-                        feedbackEvent.correlationId()
-                );
 
                 processCriticalFeedback(
                         feedbackEvent
@@ -63,15 +58,14 @@ public class CriticalFeedbackConsumer
     private void processCriticalFeedback(
             FeedbackEventDTO event
     ) {
-
-        log.warn(
+        System.out.printf(
                 """
                 CRITICAL FEEDBACK RECEIVED
-
-                Id: {}
-                Description: {}
-                Urgency: {}
-                CreatedAt: {}
+        
+                Id: %s
+                Description: %s
+                Urgency: %s
+                CreatedAt: %s
                 """,
                 event.id(),
                 event.description(),
