@@ -1,45 +1,43 @@
 name: Deploy API
 
 on:
-push:
-branches:
-  - main
-paths:
-  - 'api/**'
-  - 'core/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'api/**'
+      - 'core/**'
 
-workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   deploy:
-  runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
-  steps:
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
 
-    - name: Setup Java 21
-      uses: actions/setup-java@v4
-      with:
-        distribution: temurin
-        java-version: 21
+      - name: Setup SAM
+        uses: aws-actions/setup-sam@v2
 
-    - name: Setup SAM
-      uses: aws-actions/setup-sam@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+      - name: Build API
+        working-directory: api
+        run: sam build
 
-    - name: Build API
-      working-directory: api
-      run: sam build
-
-    - name: Deploy API
-      working-directory: api
-      run: sam deploy
-
+      - name: Deploy API
+        working-directory: api
+        run: sam deploy
