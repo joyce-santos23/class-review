@@ -17,6 +17,11 @@ Resources:
       Policies:
         - SQSPollerPolicy:
             QueueName: !ImportValue CriticalFeedbackQueueName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - sns:Publish
+              Resource: arn:aws:sns:us-east-1:112920803674:critical-feedback-alerts
 
       Events:
         CriticalFeedbackQueueEvent:
@@ -30,3 +35,4 @@ Resources:
           QUARKUS_SQS_AWS_REGION: us-east-1
           CRITICAL_FEEDBACK_QUEUE_URL: !ImportValue CriticalFeedbackQueueUrl
           CRITICAL_FEEDBACK_QUEUE_ARN: !ImportValue CriticalFeedbackQueueArn
+          CRITICAL_FEEDBACK_SNS_TOPIC_ARN: arn:aws:sns:us-east-1:112920803674:critical-feedback-alerts

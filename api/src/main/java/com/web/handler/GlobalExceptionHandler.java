@@ -1,6 +1,6 @@
 package com.web.handler;
 
-import com.classreview.core.domain.exceptions.ErrorReadingMessageException;
+
 import com.classreview.core.domain.exceptions.InvalidFeedbackException;
 
 import jakarta.ws.rs.core.Response;
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler
                     .build();
         }
 
-        if (exception instanceof ErrorReadingMessageException ex) {
+        if (exception instanceof com.classreview.core.domain.exceptions.ErrorReadingMessageException ex) {
 
             ProblemDetailResponse response =
                     ProblemDetailFactory.create(
