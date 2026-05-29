@@ -37,6 +37,6 @@ jobs:
       - name: Build Maven
         run: ./mvnw clean package -DskipTests
 
-      - name: Deploy API
-        working-directory: api
+      - name: Deploy Consumer
+        working-directory: critical-feedback-consumer
         run: sam deploy

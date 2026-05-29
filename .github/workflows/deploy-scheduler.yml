@@ -37,6 +37,6 @@ jobs:
       - name: Build Maven
         run: ./mvnw clean package -DskipTests
 
-      - name: Deploy API
-        working-directory: api
+      - name: Deploy Scheduler
+        working-directory: scheduler
         run: sam deploy
