@@ -8,7 +8,6 @@ release.properties
 
 # AWS SAM
 .aws-sam/
-samconfig.toml
 
 # Eclipse
 .project

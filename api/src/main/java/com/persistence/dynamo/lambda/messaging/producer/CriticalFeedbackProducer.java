@@ -4,6 +4,7 @@ import com.classreview.core.application.dto.event.FeedbackEventDTO;
 import com.classreview.core.application.gateway.notification.NotificationPublisher;
 import com.classreview.core.domain.exceptions.InvalidFeedbackException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -27,9 +28,8 @@ public class CriticalFeedbackProducer
 
         this.sqsClient = sqsClient;
 
-        this.objectMapper =
-                new ObjectMapper()
-                        .findAndRegisterModules();
+        this.objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule());
     }
 
     @Override

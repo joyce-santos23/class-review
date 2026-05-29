@@ -18,15 +18,22 @@ Resources:
         - DynamoDBReadPolicy:
             TableName: !ImportValue FeedbackTableName
 
+        - Statement:
+            - Effect: Allow
+              Action:
+                - sns:Publish
+              Resource: arn:aws:sns:us-east-1:112920803674:weekly-feedback-report
+
       Environment:
         Variables:
           QUARKUS_DYNAMODB_AWS_REGION: us-east-1
           FEEDBACK_TABLE_NAME: !ImportValue FeedbackTableName
           FEEDBACK_API_URL: !ImportValue FeedbackApiUrl
+          WEEKLY_REPORT_TOPIC_ARN: arn:aws:sns:us-east-1:112920803674:weekly-feedback-report
 
       Events:
         WeeklySchedule:
           Type: ScheduleV2
           Properties:
-            ScheduleExpression: 'rate(2 minutes)'
+            ScheduleExpression: 'cron(0 9 ? * MON *)'
             Description: "Gera relatório semanal automaticamente"
