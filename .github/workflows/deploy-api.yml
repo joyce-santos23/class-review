@@ -34,9 +34,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build API
-        working-directory: api
-        run: sam build
+      - name: Build Maven
+        run: ./mvnw clean package -DskipTests
 
       - name: Deploy API
         working-directory: api
