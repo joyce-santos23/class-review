@@ -1,7 +1,0 @@
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'critical-feedback-consumer/**'
-      - 'core/**'
