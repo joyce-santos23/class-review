@@ -1,66 +1,270 @@
-# classreview
+# Class Review - Serverless Feedback Management Platform
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+## Sobre o Projeto
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+Class Review é uma solução serverless desenvolvida para coleta, processamento e análise de feedbacks acadêmicos utilizando serviços gerenciados da AWS.
 
-## Running the application in dev mode
+A plataforma permite o registro de avaliações e comentários, classificação automática de criticidade, processamento assíncrono de ocorrências críticas e geração automatizada de relatórios semanais.
 
-You can run your application in dev mode that enables live coding using:
+---
 
-```shell script
-./mvnw quarkus:dev
+## Arquitetura da Solução
+
+A aplicação foi construída utilizando uma arquitetura orientada a eventos baseada em microsserviços serverless.
+
+### Fluxo de Feedbacks
+
+```text
+Cliente
+   ↓
+API Gateway
+   ↓
+Feedback API (AWS Lambda)
+   ↓
+DynamoDB
+
+Feedback Crítico
+   ↓
+Amazon SQS
+   ↓
+Critical Feedback Consumer (AWS Lambda)
+   ↓
+Amazon SNS
+   ↓
+E-mail de Alerta
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+### Fluxo de Relatórios
 
-## Packaging and running the application
-
-The application can be packaged using:
-
-```shell script
-./mvnw package
+```text
+Amazon EventBridge Scheduler
+   ↓
+Weekly Report Scheduler (AWS Lambda)
+   ↓
+DynamoDB
+   ↓
+Amazon SNS
+   ↓
+E-mail com Relatório Semanal
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+---
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+## Tecnologias Utilizadas
 
-If you want to build an _über-jar_, execute the following command:
+### Backend
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+* Java 21
+* Quarkus
+* Maven
+
+### Cloud AWS
+
+* AWS Lambda
+* Amazon API Gateway
+* Amazon DynamoDB
+* Amazon SQS
+* Amazon SNS
+* Amazon EventBridge Scheduler
+* Amazon CloudWatch
+* AWS CloudFormation
+* AWS SAM
+
+### DevOps
+
+* GitHub Actions
+* CI/CD
+* Infrastructure as Code (IaC)
+
+---
+
+## Estrutura do Projeto
+
+```text
+class-review
+│
+├── api
+│   └── API responsável pelo recebimento dos feedbacks
+│
+├── critical-feedback-consumer
+│   └── Processamento assíncrono de feedbacks críticos
+│
+├── scheduler
+│   └── Geração automática de relatórios semanais
+│
+└── core
+    └── Regras de negócio compartilhadas
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+---
 
-## Creating a native executable
+## Funcionalidades
 
-You can create a native executable using:
+### Cadastro de Feedbacks
 
-```shell script
-./mvnw package -Dnative
+Endpoint responsável pelo recebimento das avaliações.
+
+#### Exemplo de Requisição
+
+```json
+{
+  "rating": 4,
+  "comment": "professor ruim"
+}
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+#### Exemplo de Resposta
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
+```json
+{
+  "id": "797c459e-6486-4a39-a92b-a677b76260b6",
+  "rating": 4,
+  "comment": "professor ruim",
+  "urgency": "CRITICAL"
+}
 ```
 
-You can then execute your native executable with: `./target/classreview-1.0.0-SNAPSHOT-runner`
+---
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
+### Processamento de Feedbacks Críticos
 
-## Related Guides
+Feedbacks classificados como críticos são enviados para uma fila SQS para processamento assíncrono.
 
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
+Após o processamento, notificações são enviadas através do Amazon SNS.
 
-## Provided Code
+---
 
-### REST
+### Relatórios Semanais
 
-Easily start your REST Web Services
+O sistema gera automaticamente relatórios contendo:
 
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+* Média das avaliações
+* Quantidade de feedbacks por dia
+* Quantidade de feedbacks por nível de urgência
+* Resumo dos feedbacks processados
+
+Exemplo simplificado:
+
+```json
+{
+  "feedbacks": [],
+  "feedbacksPerDay": {},
+  "feedbacksByUrgency": {},
+  "averageRating": 4.2
+}
+```
+
+---
+
+## Infraestrutura AWS
+
+### Stacks CloudFormation
+
+* class-review-api
+* class-review-consumer
+* class-review-scheduler
+
+### Recursos Provisionados
+
+#### API
+
+* API Gateway
+* AWS Lambda
+* DynamoDB
+* Amazon SQS
+
+#### Consumer
+
+* AWS Lambda
+* Event Source Mapping (SQS → Lambda)
+
+#### Scheduler
+
+* AWS Lambda
+* EventBridge Scheduler
+
+---
+
+## Monitoramento e Observabilidade
+
+A solução utiliza Amazon CloudWatch para monitoramento dos serviços.
+
+### Alarmes Configurados
+
+* api-lambda-errors
+* api-lambda-duration
+* consumer-errors
+* scheduler-errors
+
+### Tópicos SNS
+
+* critical-feedback-alerts
+* weekly-feedback-report
+* system-alerts
+
+---
+
+## CI/CD
+
+O projeto utiliza GitHub Actions para automação de build e deploy.
+
+Cada serviço possui pipeline independente:
+
+* deploy-api.yml
+* deploy-consumer.yml
+* deploy-scheduler.yml
+
+Fluxo de deploy:
+
+```text
+Push na branch main
+        ↓
+GitHub Actions
+        ↓
+Build Maven
+        ↓
+AWS SAM
+        ↓
+CloudFormation
+        ↓
+Deploy Automático
+```
+
+---
+
+## Deploy Manual
+
+### Build
+
+```bash
+./mvnw clean package -DskipTests
+```
+
+### Deploy da API
+
+```bash
+cd api
+sam deploy
+```
+
+### Deploy do Consumer
+
+```bash
+cd critical-feedback-consumer
+sam deploy
+```
+
+### Deploy do Scheduler
+
+```bash
+cd scheduler
+sam deploy
+```
+
+---
+
+## Autor
+
+Projeto desenvolvido como parte da disciplina de Arquitetura Cloud e Computação Serverless.
+
+**Joyce Santos**
